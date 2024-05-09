@@ -1,18 +1,7 @@
 version: '3'
 services:
-  # app:
-  #   build: .
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - db
-  #     # db:
-  #     #   condition: service_healthy
-  #   command: ["sh", "-c", "/cloud-go/bin/migrate up && /cloud-go/bin/api"]
-  #   restart: always
-
   db:
-    image: postgres:alpine
+    image: postgres
     environment:
       - POSTGRES_DB=cloud_go_db
       - POSTGRES_USER=cloud_go_user
@@ -20,10 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ~/db/pgdata:/var/lib/postgresql/data
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready"]
-      #   interval: 6s
-    #   timeout: 5s
-      #   retries: 5
+      - pgdata:/var/lib/postgresql/data
     restart: always
+volumes:
+  pgdata:

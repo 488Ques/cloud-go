@@ -11,109 +11,88 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createBook = `-- name: CreateBook :one
-INSERT INTO books (
+const createPost = `-- name: CreatePost :one
+INSERT INTO Post (
     id,
     title,
-    author,
-    published_date,
-    image_url,
-    description
+    content,
+    created_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4
 )
-RETURNING id, title, author, published_date, image_url, description, created_at, updated_at, deleted_at
+RETURNING id, title, content, created_at
 `
 
-type CreateBookParams struct {
-	ID            pgtype.UUID `json:"id"`
-	Title         string      `json:"title"`
-	Author        string      `json:"author"`
-	PublishedDate pgtype.Date `json:"published_date"`
-	ImageUrl      pgtype.Text `json:"image_url"`
-	Description   pgtype.Text `json:"description"`
+type CreatePostParams struct {
+	ID        pgtype.UUID      `json:"id"`
+	Title     pgtype.Text      `json:"title"`
+	Content   pgtype.Text      `json:"content"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
-func (q *Queries) CreateBook(ctx context.Context, arg CreateBookParams) (Book, error) {
-	row := q.db.QueryRow(ctx, createBook,
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
+	row := q.db.QueryRow(ctx, createPost,
 		arg.ID,
 		arg.Title,
-		arg.Author,
-		arg.PublishedDate,
-		arg.ImageUrl,
-		arg.Description,
+		arg.Content,
+		arg.CreatedAt,
 	)
-	var i Book
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
-		&i.Author,
-		&i.PublishedDate,
-		&i.ImageUrl,
-		&i.Description,
+		&i.Content,
 		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
 	)
 	return i, err
 }
 
-const deleteBooks = `-- name: DeleteBooks :exec
-DELETE FROM books
+const deletePosts = `-- name: DeletePosts :exec
+DELETE FROM Post
 WHERE id = $1
 `
 
-func (q *Queries) DeleteBooks(ctx context.Context, id pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, deleteBooks, id)
+func (q *Queries) DeletePosts(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deletePosts, id)
 	return err
 }
 
-const getBook = `-- name: GetBook :one
-SELECT id, title, author, published_date, image_url, description, created_at, updated_at, deleted_at FROM books
+const getPost = `-- name: GetPost :one
+SELECT id, title, content, created_at FROM Post
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetBook(ctx context.Context, id pgtype.UUID) (Book, error) {
-	row := q.db.QueryRow(ctx, getBook, id)
-	var i Book
+func (q *Queries) GetPost(ctx context.Context, id pgtype.UUID) (Post, error) {
+	row := q.db.QueryRow(ctx, getPost, id)
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
-		&i.Author,
-		&i.PublishedDate,
-		&i.ImageUrl,
-		&i.Description,
+		&i.Content,
 		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
 	)
 	return i, err
 }
 
-const listBooks = `-- name: ListBooks :many
-SELECT id, title, author, published_date, image_url, description, created_at, updated_at, deleted_at FROM books
+const listPosts = `-- name: ListPosts :many
+SELECT id, title, content, created_at FROM Post
 ORDER BY title
 `
 
-func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
-	rows, err := q.db.Query(ctx, listBooks)
+func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
+	rows, err := q.db.Query(ctx, listPosts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Book
+	var items []Post
 	for rows.Next() {
-		var i Book
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
-			&i.Author,
-			&i.PublishedDate,
-			&i.ImageUrl,
-			&i.Description,
+			&i.Content,
 			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -125,46 +104,35 @@ func (q *Queries) ListBooks(ctx context.Context) ([]Book, error) {
 	return items, nil
 }
 
-const updateBooks = `-- name: UpdateBooks :one
-UPDATE books
+const updatePosts = `-- name: UpdatePosts :one
+UPDATE Post
   SET title = $2,
-  author = $3,
-  published_date = $4,
-  image_url = $5,
-  description = $6
+  content = $3,
+  created_at = $4
 WHERE id = $1
-RETURNING id, title, author, published_date, image_url, description, created_at, updated_at, deleted_at
+RETURNING id, title, content, created_at
 `
 
-type UpdateBooksParams struct {
-	ID            pgtype.UUID `json:"id"`
-	Title         string      `json:"title"`
-	Author        string      `json:"author"`
-	PublishedDate pgtype.Date `json:"published_date"`
-	ImageUrl      pgtype.Text `json:"image_url"`
-	Description   pgtype.Text `json:"description"`
+type UpdatePostsParams struct {
+	ID        pgtype.UUID      `json:"id"`
+	Title     pgtype.Text      `json:"title"`
+	Content   pgtype.Text      `json:"content"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
-func (q *Queries) UpdateBooks(ctx context.Context, arg UpdateBooksParams) (Book, error) {
-	row := q.db.QueryRow(ctx, updateBooks,
+func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error) {
+	row := q.db.QueryRow(ctx, updatePosts,
 		arg.ID,
 		arg.Title,
-		arg.Author,
-		arg.PublishedDate,
-		arg.ImageUrl,
-		arg.Description,
+		arg.Content,
+		arg.CreatedAt,
 	)
-	var i Book
+	var i Post
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
-		&i.Author,
-		&i.PublishedDate,
-		&i.ImageUrl,
-		&i.Description,
+		&i.Content,
 		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
 	)
 	return i, err
 }

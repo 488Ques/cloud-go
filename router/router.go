@@ -1,25 +1,33 @@
 package router
 
 import (
-	"cloud-go/resources/book"
-	"cloud-go/resources/health"
+	"cloud-go/db"
+	"cloud-go/handlers/book"
+	"cloud-go/handlers/health"
+	"log"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-func New() *chi.Mux {
+func New(queries *db.Queries, logger *log.Logger) *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
 
 	r.Get("/healthcheck", health.Read)
 
-	r.Route("/v1", func(r chi.Router) {
-		bookAPI := &book.API{}
-		r.Get("/books", bookAPI.List)
-		r.Post("/books", bookAPI.Create)
-		r.Get("/books/{id}", bookAPI.Read)
-		r.Put("/books/{id}", bookAPI.Update)
-		r.Delete("/books/{id}", bookAPI.Delete)
-	})
+	bookAPI := book.NewHandler(queries, logger)
+
+	bookRouter := chi.NewRouter()
+	bookRouter.Get("/", bookAPI.List)
+	bookRouter.Post("/", bookAPI.Create)
+	bookRouter.Get("/{id}", bookAPI.Read)
+	bookRouter.Put("/{id}", bookAPI.Update)
+	bookRouter.Delete("/{id}", bookAPI.Delete)
+
+	apiRouter := chi.NewRouter()
+	apiRouter.Mount("/books", bookRouter)
+	r.Mount("/v1", apiRouter)
 
 	return r
 }

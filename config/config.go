@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -9,11 +10,12 @@ import (
 )
 
 type Config struct {
-	Server ConfigServer
-	DB     ConfigDB
+	Server configServer
+	DB     configDB
 }
 
-type ConfigServer struct {
+type configServer struct {
+	Host         string        `env:"SERVER_HOST"`
 	Port         int           `env:"SERVER_PORT"`
 	TimeoutRead  time.Duration `env:"SERVER_TIMEOUT_READ"`
 	TimeoutWrite time.Duration `env:"SERVER_TIMEOUT_WRITE"`
@@ -21,7 +23,7 @@ type ConfigServer struct {
 	Debug        bool          `env:"SERVER_DEBUG"`
 }
 
-type ConfigDB struct {
+type configDB struct {
 	Host     string `env:"DB_HOST"`
 	Port     int    `env:"DB_PORT"`
 	Username string `env:"DB_USER"`
@@ -30,17 +32,21 @@ type ConfigDB struct {
 	Debug    bool   `env:"DB_DEBUG"`
 }
 
-func New() Config {
+func New() *Config {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %e", err)
 	}
 
-	cfg := Config{}
+	cfg := &Config{}
 	err = env.Parse(&cfg)
 	if err != nil {
 		log.Fatalf("Unable to parse environment variable: %e", err)
 	}
 
 	return cfg
+}
+
+func (c *Config) NewConnString() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", c.DB.Username, c.DB.Password, c.DB.Host, c.DB.Port, c.DB.DBName)
 }

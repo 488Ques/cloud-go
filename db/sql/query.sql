@@ -1,34 +1,30 @@
--- name: GetBook :one
-SELECT * FROM books
+-- name: GetPost :one
+SELECT * FROM Post
 WHERE id = $1 LIMIT 1;
 
--- name: ListBooks :many
-SELECT * FROM books
+-- name: ListPosts :many
+SELECT * FROM Post
 ORDER BY title;
 
--- name: CreateBook :one
-INSERT INTO books (
+-- name: CreatePost :one
+INSERT INTO Post (
     id,
     title,
-    author,
-    published_date,
-    image_url,
-    description
+    content,
+    created_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    $1, $2, $3, $4
 )
 RETURNING *;
 
--- name: UpdateBooks :one
-UPDATE books
+-- name: UpdatePosts :one
+UPDATE Post
   SET title = $2,
-  author = $3,
-  published_date = $4,
-  image_url = $5,
-  description = $6
+  content = $3,
+  created_at = $4
 WHERE id = $1
 RETURNING *;
 
--- name: DeleteBooks :exec
-DELETE FROM books
+-- name: DeletePosts :exec
+DELETE FROM Post
 WHERE id = $1;

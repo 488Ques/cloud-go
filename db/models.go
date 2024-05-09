@@ -8,14 +8,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Book struct {
-	ID            pgtype.UUID      `json:"id"`
-	Title         string           `json:"title"`
-	Author        string           `json:"author"`
-	PublishedDate pgtype.Date      `json:"published_date"`
-	ImageUrl      pgtype.Text      `json:"image_url"`
-	Description   pgtype.Text      `json:"description"`
-	CreatedAt     pgtype.Timestamp `json:"created_at"`
-	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
-	DeletedAt     pgtype.Timestamp `json:"deleted_at"`
+type Post struct {
+	ID        pgtype.UUID      `json:"id"`
+	Title     pgtype.Text      `json:"title"`
+	Content   pgtype.Text      `json:"content"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
