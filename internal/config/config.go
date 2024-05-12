@@ -35,13 +35,13 @@ type configDB struct {
 func New() *Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %e", err)
+		log.Fatalf("godotenv.Load: error loading .env file: %e", err)
 	}
 
 	cfg := &Config{}
-	err = env.Parse(&cfg)
+	err = env.Parse(cfg)
 	if err != nil {
-		log.Fatalf("Unable to parse environment variable: %e", err)
+		log.Fatalf("env.Parse: unable to parse environment variable: %v", err)
 	}
 
 	return cfg

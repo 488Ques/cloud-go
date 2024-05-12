@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cloud-go/config"
+	"cloud-go/internal/config"
 	"context"
 	"flag"
 	"fmt"
