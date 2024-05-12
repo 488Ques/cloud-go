@@ -10,18 +10,16 @@ ORDER BY title;
 INSERT INTO Post (
     id,
     title,
-    content,
-    created_at
+    content
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3
 )
-RETURNING *;
+RETURNING id, title, content;
 
 -- name: UpdatePosts :one
 UPDATE Post
   SET title = $2,
-  content = $3,
-  created_at = $4
+  content = $3
 WHERE id = $1
 RETURNING *;
 

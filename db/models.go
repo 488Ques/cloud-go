@@ -5,12 +5,13 @@
 package db
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Post struct {
-	ID        pgtype.UUID      `json:"id"`
-	Title     pgtype.Text      `json:"title"`
-	Content   pgtype.Text      `json:"content"`
+	ID        uuid.UUID        `json:"id"`
+	Title     string           `json:"title"`
+	Content   string           `json:"content"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }

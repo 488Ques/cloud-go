@@ -1,10 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE Post (
-    id UUID PRIMARY KEY,
-    title VARCHAR(100),
-    content TEXT,
-    created_at TIMESTAMP
+    id UUID PRIMARY KEY NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
 );
 -- +goose StatementEnd
 

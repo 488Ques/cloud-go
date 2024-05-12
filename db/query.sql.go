@@ -8,42 +8,36 @@ package db
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createPost = `-- name: CreatePost :one
 INSERT INTO Post (
     id,
     title,
-    content,
-    created_at
+    content
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3
 )
-RETURNING id, title, content, created_at
+RETURNING id, title, content
 `
 
 type CreatePostParams struct {
-	ID        pgtype.UUID      `json:"id"`
-	Title     pgtype.Text      `json:"title"`
-	Content   pgtype.Text      `json:"content"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID      uuid.UUID `json:"id"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
-	row := q.db.QueryRow(ctx, createPost,
-		arg.ID,
-		arg.Title,
-		arg.Content,
-		arg.CreatedAt,
-	)
-	var i Post
-	err := row.Scan(
-		&i.ID,
-		&i.Title,
-		&i.Content,
-		&i.CreatedAt,
-	)
+type CreatePostRow struct {
+	ID      uuid.UUID `json:"id"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
+}
+
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
+	row := q.db.QueryRow(ctx, createPost, arg.ID, arg.Title, arg.Content)
+	var i CreatePostRow
+	err := row.Scan(&i.ID, &i.Title, &i.Content)
 	return i, err
 }
 
@@ -52,7 +46,7 @@ DELETE FROM Post
 WHERE id = $1
 `
 
-func (q *Queries) DeletePosts(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DeletePosts(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deletePosts, id)
 	return err
 }
@@ -62,7 +56,7 @@ SELECT id, title, content, created_at FROM Post
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetPost(ctx context.Context, id pgtype.UUID) (Post, error) {
+func (q *Queries) GetPost(ctx context.Context, id uuid.UUID) (Post, error) {
 	row := q.db.QueryRow(ctx, getPost, id)
 	var i Post
 	err := row.Scan(
@@ -107,26 +101,19 @@ func (q *Queries) ListPosts(ctx context.Context) ([]Post, error) {
 const updatePosts = `-- name: UpdatePosts :one
 UPDATE Post
   SET title = $2,
-  content = $3,
-  created_at = $4
+  content = $3
 WHERE id = $1
 RETURNING id, title, content, created_at
 `
 
 type UpdatePostsParams struct {
-	ID        pgtype.UUID      `json:"id"`
-	Title     pgtype.Text      `json:"title"`
-	Content   pgtype.Text      `json:"content"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
+	ID      uuid.UUID `json:"id"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
 }
 
 func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error) {
-	row := q.db.QueryRow(ctx, updatePosts,
-		arg.ID,
-		arg.Title,
-		arg.Content,
-		arg.CreatedAt,
-	)
+	row := q.db.QueryRow(ctx, updatePosts, arg.ID, arg.Title, arg.Content)
 	var i Post
 	err := row.Scan(
 		&i.ID,
