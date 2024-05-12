@@ -1,4 +1,4 @@
-package books
+package post
 
 import (
 	"cloud-go/db"
@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 )
 
 type handler struct {
@@ -24,7 +23,7 @@ func New(queries *db.Queries, logger *log.Logger) *handler {
 }
 
 func (h *handler) RegisterEndpoints(router *chi.Mux) {
-	router.Route("/api/v1/book", func(r chi.Router) {
+	router.Route("/api/v1/post", func(r chi.Router) {
 		r.Get("/", h.List)
 		r.Post("/", h.Create)
 	})
@@ -41,18 +40,14 @@ func (h *handler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
-	var postRequest struct {
-		Title   string `json:"title"`
-		Content string `json:"content"`
-	}
+	var postRequest db.CreatePostParams
 	err := json.NewDecoder(r.Body).Decode(&postRequest)
 	if err != nil {
+		// TODO Handle error
 		return
 	}
 
-	uuid := uuid.New()
 	post, err := h.queries.CreatePost(r.Context(), db.CreatePostParams{
-		ID:      uuid,
 		Title:   postRequest.Title,
 		Content: postRequest.Content,
 	})

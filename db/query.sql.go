@@ -13,19 +13,17 @@ import (
 
 const createPost = `-- name: CreatePost :one
 INSERT INTO Post (
-    id,
     title,
     content
 ) VALUES (
-    $1, $2, $3
+    $1, $2
 )
 RETURNING id, title, content
 `
 
 type CreatePostParams struct {
-	ID      uuid.UUID `json:"id"`
-	Title   string    `json:"title"`
-	Content string    `json:"content"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 type CreatePostRow struct {
@@ -35,7 +33,7 @@ type CreatePostRow struct {
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (CreatePostRow, error) {
-	row := q.db.QueryRow(ctx, createPost, arg.ID, arg.Title, arg.Content)
+	row := q.db.QueryRow(ctx, createPost, arg.Title, arg.Content)
 	var i CreatePostRow
 	err := row.Scan(&i.ID, &i.Title, &i.Content)
 	return i, err

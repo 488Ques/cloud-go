@@ -8,11 +8,10 @@ ORDER BY title;
 
 -- name: CreatePost :one
 INSERT INTO Post (
-    id,
     title,
     content
 ) VALUES (
-    $1, $2, $3
+    $1, $2
 )
 RETURNING id, title, content;
 
